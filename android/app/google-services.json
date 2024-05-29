@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "453980349317",
+    "project_id": "faso-yango",
+    "storage_bucket": "faso-yango.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453980349317:android:7e6981587eb3d76f779aec",
+        "android_client_info": {
+          "package_name": "com.example.yango_faso"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOWAZEDMqW_l-d9NIjbVJu7j2hbToev9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
