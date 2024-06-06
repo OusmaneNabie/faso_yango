@@ -3,10 +3,17 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:yango_faso/notification/notification.dart';
 
-class PassengerDetailsPage extends StatelessWidget {
+class PassengerDetailsPage extends StatefulWidget {
   final Passenger passenger;
 
   const PassengerDetailsPage({required this.passenger});
+
+  @override
+  _PassengerDetailsPageState createState() => _PassengerDetailsPageState();
+}
+
+class _PassengerDetailsPageState extends State<PassengerDetailsPage> {
+  bool isConfirmed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +43,7 @@ class PassengerDetailsPage extends StatelessWidget {
               SizedBox(height: 20),
               Center(
                 child: Text(
-                  '${passenger.firstName} ${passenger.lastName}',
+                  '${widget.passenger.firstName} ${widget.passenger.lastName}',
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -48,23 +55,23 @@ class PassengerDetailsPage extends StatelessWidget {
                 context,
                 icon: Icons.email,
                 label: 'Email',
-                value: passenger.email,
+                value: widget.passenger.email,
               ),
               SizedBox(height: 10),
               _buildDetailCard(
                 context,
                 icon: Icons.phone,
                 label: 'Numéro de téléphone',
-                value: passenger.phoneNumber,
+                value: widget.passenger.phoneNumber,
               ),
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: isConfirmed ? null : () {
                       // Action de confirmation
-                      _showConfirmationDialog(context, true, passenger);
+                      _showConfirmationDialog(context, true, widget.passenger);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.teal,
@@ -74,9 +81,9 @@ class PassengerDetailsPage extends StatelessWidget {
                     child: Text('Confirmer'),
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: isConfirmed ? null : () {
                       // Action de rejet
-                      _showConfirmationDialog(context, false, passenger);
+                      _showConfirmationDialog(context, false, widget.passenger);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -95,44 +102,44 @@ class PassengerDetailsPage extends StatelessWidget {
   }
 
   Widget _buildDetailCard(BuildContext context, {required IconData icon, required String label, required String value}) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 30,
-              color: Theme.of(context).primaryColor,
-            ),
-            SizedBox(width: 16),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+  return Card(
+    elevation: 2,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    child: Padding(
+      padding: EdgeInsets.all(16.0), // Supprimer 'const' ici
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            size: 30,
+            color: Theme.of(context).primaryColor,
+          ),
+          SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
                 ),
-                SizedBox(height: 5),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   void _showConfirmationDialog(BuildContext context, bool isConfirmed, Passenger passenger) {
     showDialog(
@@ -208,6 +215,11 @@ class PassengerDetailsPage extends StatelessWidget {
           'driverPhoneNumber': driverPhoneNumber,
           'status': 'confirmed',
           'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Mettre à jour l'état pour désactiver le bouton "Confirmer"
+        setState(() {
+          isConfirmed = true;
         });
       }
     }

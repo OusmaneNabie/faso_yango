@@ -108,7 +108,6 @@ class _DriverTripsPageState extends State<DriverTripsPage> {
               'Date: ${trip.date}',
               style: TextStyle(fontSize: 16),
             ),
-            
             SizedBox(height: 8.0),
             Text(
               'Heure: ${trip.heure}',
@@ -116,15 +115,16 @@ class _DriverTripsPageState extends State<DriverTripsPage> {
             ),
             SizedBox(height: 8.0),
             Text(
-              'Nombre de places: ${trip.places}',
-              style: TextStyle(fontSize: 16),
+              trip.places == 0
+                  ? 'Complet'
+                  : 'Nombre de places: ${trip.places}',
+              style: TextStyle(fontSize: 16, color: trip.places == 0 ? Colors.red : Colors.black),
             ),
             SizedBox(height: 8.0),
             Text(
               'Numero de téléphone: ${trip.numero}',
               style: TextStyle(fontSize: 16),
             ),
-           
             SizedBox(height: 12.0),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

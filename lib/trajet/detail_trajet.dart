@@ -15,6 +15,7 @@ class TrajetDetailsPage extends StatefulWidget {
 class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
   final TextEditingController _commentController = TextEditingController();
   late Future<DocumentSnapshot> userFuture;
+  late Future<DocumentSnapshot> vehicleFuture;
   bool isLiked = false;
   int likesCount = 0;
 
@@ -25,17 +26,26 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
     if (user != null) {
       userFuture =
           FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      vehicleFuture = FirebaseFirestore.instance
+          .collection('vehicules')
+          .doc(widget.trajet['userID'])
+          .get();
     }
     _initializeLikes();
   }
 
   void _initializeLikes() async {
     final trajetId = widget.trajet['id'];
-    final likesSnapshot = await FirebaseFirestore.instance.collection('likes').doc(trajetId).get();
+    final likesSnapshot = await FirebaseFirestore.instance
+        .collection('likes')
+        .doc(trajetId)
+        .get();
     if (likesSnapshot.exists) {
       setState(() {
         likesCount = likesSnapshot.data()!['count'];
-        isLiked = likesSnapshot.data()!['usersLiked'].contains(FirebaseAuth.instance.currentUser!.uid);
+        isLiked = likesSnapshot
+            .data()!['usersLiked']
+            .contains(FirebaseAuth.instance.currentUser!.uid);
       });
     }
   }
@@ -43,7 +53,8 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
   void _toggleLike() async {
     final trajetId = widget.trajet['id'];
     final userId = FirebaseAuth.instance.currentUser!.uid;
-    final likesRef = FirebaseFirestore.instance.collection('likes').doc(trajetId);
+    final likesRef =
+        FirebaseFirestore.instance.collection('likes').doc(trajetId);
 
     setState(() {
       if (isLiked) {
@@ -64,6 +75,8 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
     });
   }
 
+  
+ 
   @override
   Widget build(BuildContext context) {
     final depart = widget.trajet['depart'];
@@ -75,6 +88,7 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
     final userNom = widget.trajet['userNom'];
     final userPrenom = widget.trajet['userPrenom'];
     final userId = widget.trajet['userID'];
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -116,6 +130,29 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
             AvisSection(trajetId: widget.trajet['id']),
             SizedBox(height: 16.0),
             FutureBuilder<DocumentSnapshot>(
+              future: vehicleFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Erreur: ${snapshot.error}'));
+                } else if (!snapshot.hasData || !snapshot.data!.exists) {
+                  return Center(child: Text('Véhicule non trouvé.'));
+                } else {
+                  final vehicleData = snapshot.data!.data() as Map<String, dynamic>;
+                  final marque = vehicleData['brand'];
+                  final modele = vehicleData['model'];
+                  final couleur = vehicleData['registration'];
+                  return VehicleInfo(
+                    marque: marque,
+                    modele: modele,
+                    couleur: couleur,
+                  );
+                }
+              },
+            ),
+            SizedBox(height: 16.0),
+            FutureBuilder<DocumentSnapshot>(
               future: userFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -125,8 +162,7 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
                 } else if (!snapshot.hasData || !snapshot.data!.exists) {
                   return Center(child: Text('Utilisateur non trouvé.'));
                 } else {
-                  final userData =
-                      snapshot.data!.data() as Map<String, dynamic>;
+                  final userData = snapshot.data!.data() as Map<String, dynamic>;
                   final name = userData['firstName'];
                   final surname = userData['lastName'];
                   return CommentSection(
@@ -148,6 +184,8 @@ class _TrajetDetailsPageState extends State<TrajetDetailsPage> {
     );
   }
 }
+
+
 
 class TrajetHeader extends StatelessWidget {
   final String depart;
@@ -171,49 +209,53 @@ class TrajetHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-  color: Colors.teal[100],
-  child: Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$depart -> $destination',
-          style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-        ),
-        SizedBox(height: 16.0),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      color: Colors.teal[100],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              '$depart -> $destination',
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 16.0),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.person, size: 48.0),
-                SizedBox(width: 16.0),
-                Column(
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Conducteur: $userNom $userPrenom',
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold),
-                    ),
-                    Row(
+                    Icon(Icons.person, size: 48.0),
+                    SizedBox(width: 16.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.star, color: Colors.orange),
-                        Text('4.0 (200 avis)'),
+                        const Text(
+                          'Conducteur:',
+                          style: TextStyle(
+                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          ' $userNom $userPrenom',
+                          style: const TextStyle(
+                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.star, color: Colors.orange),
+                            Text('4.0 (200 avis)'),
+                          ],
+                        ),
+                        Text('Véhicule: , 208, Rouge'),
                       ],
                     ),
-                    Text('Véhicule: Peugeot 208, Rouge'),
                   ],
                 ),
               ],
             ),
-            
-          ],
-        ),
-        Column(
+            Column(
               children: [
                 IconButton(
                   icon: Icon(
@@ -225,11 +267,10 @@ class TrajetHeader extends StatelessWidget {
                 Text('$likesCount J\'aime'),
               ],
             ),
-      ],
-    ),
-  ),
-);
-
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -481,7 +522,7 @@ class AvisSection extends StatelessWidget {
             SizedBox(height: 8.0),
             StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
-                  .collection('avis')
+                  .collection('comments')
                   .where('trajetId', isEqualTo: trajetId)
                   .snapshots(),
               builder: (context, snapshot) {
@@ -492,29 +533,37 @@ class AvisSection extends StatelessWidget {
                 } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(child: Text('Aucun avis disponible.'));
                 } else {
-                  return Column(
-                    children: snapshot.data!.docs.map((document) {
-                      final data = document.data() as Map<String, dynamic>;
-                      final commentaire = data['commentaire'];
-                      final note = data['note'];
-                      final user = data['user'];
-                      return ListTile(
-                        leading: Icon(Icons.person),
-                        title: Text(user),
-                        subtitle: Text(commentaire),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: List.generate(
-                            5,
-                            (index) => Icon(
-                              index < note ? Icons.star : Icons.star_border,
-                              color: Colors.orange,
-                            ),
+                  final comments = snapshot.data!.docs.map((document) {
+                    final data = document.data() as Map<String, dynamic>;
+                    final commentaire = data['commentaire'] ?? '';
+                    final note = data['note'] ?? 0;
+                    final user = data['user'] ?? 'Anonyme';
+
+                    return ListTile(
+                      leading: Icon(Icons.person),
+                      title: Text(user),
+                      subtitle: Text(commentaire),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(
+                          5,
+                          (index) => Icon(
+                            index < note ? Icons.star : Icons.star_border,
+                            color: Colors.orange,
                           ),
                         ),
-                      );
-                    }).toList(),
-                  );
+                      ),
+                    );
+                  }).toList();
+
+                  return comments.length > 3
+                      ? Container(
+                          height: 300.0, // Adjust height as needed
+                          child: SingleChildScrollView(
+                            child: Column(children: comments),
+                          ),
+                        )
+                      : Column(children: comments);
                 }
               },
             ),
@@ -569,7 +618,8 @@ class CommentSection extends StatelessWidget {
                     'trajetId': trajetId,
                     'user': '$name $surname',
                     'commentaire': commentaire,
-                    'note': 5, // Exemple de note, à changer selon l'implémentation
+                    'note':
+                        5, // Exemple de note, à changer selon l'implémentation
                     'timestamp': FieldValue.serverTimestamp(),
                   });
                   commentController.clear();
@@ -635,7 +685,8 @@ class SuggestionsSection extends StatelessWidget {
         Container(
           height: 200.0, // Hauteur fixe pour la liste des suggestions
           child: FutureBuilder<QuerySnapshot>(
-            future: FirebaseFirestore.instance.collection('trajets').limit(3).get(),
+            future:
+                FirebaseFirestore.instance.collection('trajets').limit(3).get(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Center(child: CircularProgressIndicator());
@@ -647,7 +698,8 @@ class SuggestionsSection extends StatelessWidget {
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
-                    final data = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    final data = snapshot.data!.docs[index].data()
+                        as Map<String, dynamic>;
                     final depart = data['depart'];
                     final destination = data['destination'];
                     final heure = data['heure'];
@@ -667,3 +719,39 @@ class SuggestionsSection extends StatelessWidget {
   }
 }
 
+class VehicleInfo extends StatelessWidget {
+  final String marque;
+  final String modele;
+  final String couleur;
+
+  VehicleInfo({
+    required this.marque,
+    required this.modele,
+    required this.couleur,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.teal[50],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Informations sur le véhicule',
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8.0),
+            InfoRow(icon: Icons.directions_car, label: 'Marque', value: marque),
+            SizedBox(height: 8.0),
+            InfoRow(icon: Icons.directions_car, label: 'Immatriculation', value: modele),
+            SizedBox(height: 8.0),
+            InfoRow(icon: Icons.color_lens, label: 'Modele', value: couleur),
+          ],
+        ),
+      ),
+    );
+  }
+}

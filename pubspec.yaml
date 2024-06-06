@@ -41,6 +41,8 @@ dependencies:
   firebase_messaging: ^14.9.2
   percent_indicator: ^4.2.3
   url_launcher: ^6.2.6
+  google_sign_in: ^6.2.1
+  sign_in_with_apple: ^6.1.0
 
 dev_dependencies:
   flutter_test:

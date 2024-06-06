@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:yango_faso/authentification/sign_in.dart';
 import 'package:yango_faso/firebase/authentification.dart';
 import 'package:yango_faso/home/bar_de_navigation.dart';
@@ -75,6 +77,42 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
         );
       }
     }
+  }
+
+
+  Future<UserCredential> signInWithGoogle() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+    if (googleAuth?.accessToken != null && googleAuth?.idToken != null) {
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+      return FirebaseAuth.instance.signInWithCredential(credential);
+    } else {
+      throw FirebaseAuthException(
+        code: 'ERROR_GOOGLE_LOGIN_FAILED',
+        message: 'Google sign-in failed',
+      );
+    }
+  }
+
+  Future<UserCredential> signInWithApple() async {
+    final appleCredential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    final OAuthProvider oAuthProvider = OAuthProvider('apple.com');
+    final OAuthCredential credential = oAuthProvider.credential(
+      idToken: appleCredential.identityToken,
+      accessToken: appleCredential.authorizationCode,
+    );
+
+    return FirebaseAuth.instance.signInWithCredential(credential);
   }
 
   @override
@@ -162,16 +200,38 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _buildSocialButton(FontAwesomeIcons.facebook, Colors.blue, () {
-                          // Implémentez la logique de connexion avec Facebook ici
+                        _buildSocialButton(FontAwesomeIcons.facebook, Colors.blue,(){}),
+                        const SizedBox(width: 20),
+                        _buildSocialButton(FontAwesomeIcons.google, Colors.red, () async {
+                          try {
+                            UserCredential userCredential = await signInWithGoogle();
+                            if (userCredential.user != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BarDeNavigation(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign-in failed: $e')));
+                          }
                         }),
                         const SizedBox(width: 20),
-                        _buildSocialButton(FontAwesomeIcons.google, Colors.red, () {
-                          // Implémentez la logique de connexion avec Google ici
-                        }),
-                        const SizedBox(width: 20),
-                        _buildSocialButton(FontAwesomeIcons.apple, Colors.black, () {
-                          // Implémentez la logique de connexion avec iCloud ici
+                        _buildSocialButton(FontAwesomeIcons.apple, Colors.black, () async {
+                          try {
+                            UserCredential userCredential = await signInWithApple();
+                            if (userCredential.user != null) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => BarDeNavigation(),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Apple sign-in failed: $e')));
+                          }
                         }),
                       ],
                     ),

@@ -14,7 +14,6 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
   final _yearController = TextEditingController();
   final _colorController = TextEditingController();
   final _registrationController = TextEditingController();
-
   String? _vehicleIdToEdit;
 
   void _editVehicle(Map<String, dynamic> vehicleData, String vehicleId) {
@@ -23,7 +22,8 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
       _modelController.text = vehicleData['model'];
       _yearController.text = vehicleData['year'];
       _colorController.text = vehicleData['color'];
-      _registrationController.text = vehicleData['registration'];
+      _registrationController.text=vehicleData['registration'];
+
       _vehicleIdToEdit = vehicleId;
     });
   }
@@ -35,7 +35,7 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
         'model': _modelController.text,
         'year': _yearController.text,
         'color': _colorController.text,
-        'registration': _registrationController.text,
+        'registration':_registrationController.text,
       };
 
       await FirebaseFirestore.instance
@@ -113,18 +113,19 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
                       children: [
                         Text('Année: ${vehicle['year']}'),
                         Text('Couleur: ${vehicle['color']}'),
-                        Text('Immatriculation: ${vehicle['registration']}'),
+                        Text('Matricule: ${vehicle['registration']}'),
+
                       ],
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: Icon(Icons.edit, color: Colors.blue,),
                           onPressed: () => _editVehicle(vehicle, vehicleId),
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: Icon(Icons.delete, color: Colors.red,),
                           onPressed: () => _deleteVehicle(vehicleId),
                         ),
                       ],
@@ -204,10 +205,10 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
                     ),
                     TextFormField(
                       controller: _registrationController,
-                      decoration: InputDecoration(labelText: 'Immatriculation'),
+                      decoration: InputDecoration(labelText: 'Matricule'),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer l\'immatriculation';
+                          return 'Veuillez entrer le matricule';
                         }
                         return null;
                       },
@@ -221,4 +222,8 @@ class _UserVehiclesPageState extends State<UserVehiclesPage> {
   }
 }
 
-
+void main() {
+  runApp(MaterialApp(
+    home: UserVehiclesPage(),
+  ));
+}

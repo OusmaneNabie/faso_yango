@@ -6,6 +6,7 @@ import 'package:yango_faso/admin/add_passenger.dart';
 import 'package:yango_faso/admin/add_trip.dart';
 import 'package:yango_faso/admin/admin_list.dart';
 import 'package:yango_faso/admin/driver_liste.dart';
+import 'package:yango_faso/admin/liste_car.dart';
 import 'package:yango_faso/admin/passenger_list.dart';
 import 'package:yango_faso/admin/trip_list.dart';
 import 'package:yango_faso/firebase/authentification.dart';
@@ -69,7 +70,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Tableau de bord Administrateur'),
+            _buildSectionTitle('Tableau de bord '),
             SizedBox(height: 20),
             _buildSectionTitle('Statistiques'),
             _buildStatisticsGrid(),
@@ -240,6 +241,13 @@ Widget _buildTripManagementSection() {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => AddTripForm()),
+          );
+        }),
+        SizedBox(width: 20),
+        _buildIconButton(Icons.add, 'Liste des vehicules', Colors.yellow, () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => VehicleListPage()),
           );
         }),
         SizedBox(width: 10),
