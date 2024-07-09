@@ -61,7 +61,13 @@ class _DriverReservedRidesPageState extends State<DriverReservedRidesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mes trajets réservés par les passagers'),
+        title: Text(
+          'Mes trajets réservés par les passagers',
+          style: TextStyle(
+            color:Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          ),
         backgroundColor: Colors.teal,
       ),
       body: reservedTrajets.isEmpty

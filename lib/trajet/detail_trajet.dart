@@ -543,16 +543,7 @@ class AvisSection extends StatelessWidget {
                       leading: Icon(Icons.person),
                       title: Text(user),
                       subtitle: Text(commentaire),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: List.generate(
-                          5,
-                          (index) => Icon(
-                            index < note ? Icons.star : Icons.star_border,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ),
+                      
                     );
                   }).toList();
 

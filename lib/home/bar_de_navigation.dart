@@ -77,7 +77,7 @@ class _BarDeNavigationState extends State<BarDeNavigation> {
               "Publier un trajet",
               "Trajets disponibles",
               "Notifications",
-              "Profil",
+              "Profil"
             ][_currentIndex],
             style:const TextStyle(
               color: Colors.white,

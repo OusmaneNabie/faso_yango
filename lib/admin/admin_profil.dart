@@ -6,6 +6,7 @@ import 'package:yango_faso/admin/add_passenger.dart';
 import 'package:yango_faso/admin/add_trip.dart';
 import 'package:yango_faso/admin/admin_list.dart';
 import 'package:yango_faso/admin/driver_liste.dart';
+import 'package:yango_faso/admin/list_verification.dart';
 import 'package:yango_faso/admin/liste_car.dart';
 import 'package:yango_faso/admin/passenger_list.dart';
 import 'package:yango_faso/admin/trip_list.dart';
@@ -29,20 +30,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   void _logout(BuildContext context) async {
     setState(() {
-      _isLoading = true; // Mettre à jour l'état de chargement à vrai
+      _isLoading = true;
     });
 
-    // Logique pour la déconnexion
     try {
-      await AuthentificationService.signOut(context); // Appeler la fonction signOut
+      await AuthentificationService.signOut(context);
     } catch (e) {
       print("Erreur lors de la déconnexion : $e");
     }
 
-    // Attendez 3 secondes
     await Future.delayed(Duration(seconds: 3));
 
-    // Mettre à jour l'état de chargement à faux après 3 secondes
     setState(() {
       _isLoading = false;
     });
@@ -65,25 +63,25 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Tableau de bord Admin'),
+        backgroundColor: Colors.teal,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionTitle('Tableau de bord '),
-            SizedBox(height: 20),
             _buildSectionTitle('Statistiques'),
             _buildStatisticsGrid(),
-            SizedBox(height: 20),
-            _buildSectionCard('Gestion des Utilisateurs', _buildUserManagementSection()),
-            SizedBox(height: 20),
-            _buildSectionCard('Gestion des Trajets', _buildTripManagementSection()),
-            SizedBox(height: 20),
-            _buildSectionCard('Support et Tickets', _buildSupportSection()),
-            SizedBox(height: 20),
-            _buildSectionCard('Gestion Financière', _buildFinancialSection()),
-            SizedBox(height: 20),
-            _buildLogoutButton(),
+            _buildSectionTitle('Gestion'),
+            _buildManagementGrid(),
           ],
         ),
       ),
@@ -92,7 +90,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 16.0),
       child: Text(
         title,
         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.teal),
@@ -101,34 +99,117 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
   }
 
   Widget _buildStatisticsGrid() {
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: [
-        _buildScrollableStatisticCard(Icons.directions_car, 'Trajets actifs', totalTrips.toString(), Colors.blue),
-        _buildScrollableStatisticCard(Icons.check_circle, 'Trajets terminés', '450', Colors.green),
-        _buildScrollableStatisticCard(Icons.person, 'Utilisateurs actifs', totalUsers.toString(), Colors.orange),
-        _buildScrollableStatisticCard(Icons.attach_money, 'Revenus générés', '\$25,000', Colors.purple),
-      ],
-    );
-  }
-
-  Widget _buildScrollableStatisticCard(IconData icon, String title, String value, Color color) {
-    return SingleChildScrollView(
-      child: _buildStatisticCard(icon, title, value, color),
-    );
-  }
-
-  Widget _buildStatisticCard(IconData icon, String title, String value, Color color) {
     return Card(
       elevation: 4,
       margin: EdgeInsets.all(8.0),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
       child: Padding(
         padding: EdgeInsets.all(16.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildStatisticCard(Icons.person, 'Utilisateurs', totalUsers.toString(), Colors.orange),
+            _buildStatisticCard(Icons.directions_car, 'Trajets', totalTrips.toString(), Colors.blue),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatisticCard(IconData icon, String title, String value, Color color) {
+    return Column(
+      children: [
+        Icon(icon, size: 36, color: color),
+        SizedBox(height: 8.0),
+        Text(
+          title,
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        SizedBox(height: 4.0),
+        Text(
+          value,
+          style: TextStyle(fontSize: 24, color: Colors.grey[700]),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildManagementGrid() {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      children: [
+        _buildManagementCard(Icons.group, 'Utilisateurs', Colors.teal, _buildUserManagementSection),
+        _buildManagementCard(Icons.directions_car, 'Trajets', Colors.blue, _buildTripManagementSection),
+        _buildManagementCard(Icons.group_add, 'Gestion', Colors.orange, _buildSupportSection),
+        _buildManagementCard(Icons.verified_user, 'Verifications', Colors.green, _buildFinancialSection),
+      ],
+    );
+  }
+
+  Widget _buildManagementCard(IconData icon, String title, Color color, Widget Function(BuildContext) contentBuilder) {
+  return Card(
+    elevation: 8,
+    margin: EdgeInsets.all(8.0),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(20.0),
+    ),
+    child: InkWell(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 5,
+                    blurRadius: 7,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    icon,
+                    size: 48,
+                    color: color,
+                  ),
+                  SizedBox(height: 16.0),
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 20.0),
+                  contentBuilder(context),
+                  SizedBox(height: 20.0),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text(
+                      'Fermer',
+                      style: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Icon(icon, size: 36, color: color),
             SizedBox(height: 8.0),
@@ -136,178 +217,166 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               title,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 4.0),
-            Text(
-              value,
-              style: TextStyle(fontSize: 24, color: Colors.grey[700]),
-            ),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
-  Widget _buildSectionCard(String title, Widget content) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.0)),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
-            ),
-            SizedBox(height: 8.0),
-            content,
-          ],
-        ),
-      ),
-    );
-  }
-Widget _buildUserManagementSection() {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
+
+  Widget _buildUserManagementSection(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.arrow_back_ios), // Flèche de gauche
-        SizedBox(width: 10),
-        _buildIconButton(Icons.group, 'Passagers', Colors.teal, () {
+        _buildIconButton(Icons.group, 'Passagers', Colors.blue, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => PassengerListPage()),
           );
         }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.person_add, 'passager', Colors.purple, () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddPassengerForm()),
-          );
-        }),
-        SizedBox(width: 20),
+        
+        SizedBox(height: 10),
         _buildIconButton(Icons.group, 'Conducteurs', Colors.teal, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => DriverListPage()),
           );
         }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.person_add, 'Conducteur', Colors.purple, () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddDriverForm()),
-          );
-        }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.group, 'Administrateurs', Colors.teal, () {
+        
+        SizedBox(height: 10),
+        _buildIconButton(Icons.group, 'Administrateurs', Colors.red, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => AdminListPage()),
           );
         }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.person_add, 'Administrateur', Colors.purple, () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => AddAdminForm()),
-          );
-        }),
-        SizedBox(width: 10),
-        Icon(Icons.arrow_forward_ios), // Flèche de droite
+        
       ],
-    ),
-  );
-}
+    );
+  }
 
-Widget _buildTripManagementSection() {
-  return SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Row(
+  Widget _buildTripManagementSection(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.arrow_back_ios), // Flèche de gauche
-        SizedBox(width: 10),
         _buildIconButton(Icons.directions_car, 'Liste des trajets', Colors.teal, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => AllTripsPage()),
           );
         }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.add, 'ajouter un trajet', Colors.purple, () {
+        SizedBox(height: 10),
+        _buildIconButton(Icons.add, 'Ajouter Trajet', Colors.orange, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => AddTripForm()),
           );
         }),
-        SizedBox(width: 20),
-        _buildIconButton(Icons.add, 'Liste des vehicules', Colors.yellow, () {
+        SizedBox(height: 10),
+        _buildIconButton(Icons.list, 'Liste des véhicules', Colors.yellow, () {
+          Navigator.of(context).pop();
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => VehicleListPage()),
           );
         }),
-        SizedBox(width: 10),
-        Icon(Icons.arrow_forward_ios), // Flèche de droite
-      ],
-    ),
-  );
-}
-
-
-
-  Widget _buildSupportSection() {
-    return Row(
-      children: [
-        _buildIconButton(Icons.support_agent, 'Voir les tickets de support', Colors.orange, () {
-          // Action pour voir la liste des tickets de support
-        }),
       ],
     );
   }
 
-  Widget _buildFinancialSection() {
-    return Row(
+  Widget _buildSupportSection(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildIconButton(Icons.attach_money, 'Voir les transactions', Colors.green, () {
+        SizedBox(height: 10),
+        _buildIconButton(Icons.person_add, 'Ajouter Admin', Colors.teal, () {
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddAdminForm()),
+          );
+        }),
+        SizedBox(height: 10),
+        _buildIconButton(Icons.person_add, 'Ajouter Conducteur', Colors.orange, () {
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddDriverForm()),
+          );
+        }),
+        SizedBox(height: 10),
+        _buildIconButton(Icons.person_add, 'Ajouter Passager', Colors.blue, () {
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => AddPassengerForm()),
+          );
+        }),
+        
+      ],
+    );
+  }
+
+  Widget _buildFinancialSection(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildIconButton(Icons.verified_user, 'Verification des roles', Colors.green, () {
+          Navigator.of(context).pop();
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => VerificationListPage()),
+          );
           // Action pour voir les transactions financières
         }),
       ],
     );
   }
 
-  Widget _buildLogoutButton() {
-    return Center(
-      child: ElevatedButton.icon(
-        onPressed: () =>  _logout(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red, // Background color
-          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        ),
-        icon: Icon(Icons.logout, color: Colors.white),
-        label: Text('Déconnexion', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-    );
-  }
-
-  Widget _buildIconButton(IconData icon, String label, Color color, VoidCallback onPressed) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white),
-      label: Text(
-        label,
-        style: TextStyle(color: Colors.white),
-      ),
+  Widget _buildIconButton(IconData icon, String label, Color color, Function onPressed) {
+  return SizedBox(
+    width: double.infinity,
+    height: 60,
+    child: ElevatedButton(
+      onPressed: () {
+        onPressed();
+      },
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10.0),
+          borderRadius: BorderRadius.circular(30),
         ),
+        shadowColor: Colors.grey,
+        elevation: 5,
       ),
-    );
-  }
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: 24,
+            color: Colors.white,
+          ),
+          SizedBox(width: 12),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
+
 }

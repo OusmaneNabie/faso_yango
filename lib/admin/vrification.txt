@@ -1,0 +1,202 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class VerificationDetailPage extends StatefulWidget {
+  final DocumentSnapshot verification;
+
+  VerificationDetailPage({required this.verification});
+
+  @override
+  _VerificationDetailPageState createState() => _VerificationDetailPageState();
+}
+
+class _VerificationDetailPageState extends State<VerificationDetailPage> {
+  bool isVerified = false;
+
+  Future<void> _validateVerification(BuildContext context, String userId) async {
+    try {
+      // Update user role to "conducteur" in the users collection
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'role': 'conducteur',
+      });
+
+      setState(() {
+        isVerified = true;
+      });
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Validation réussie')),
+      );
+    } catch (e) {
+      // Handle specific Firebase exceptions
+      if (e is FirebaseException) {
+        // Show error message based on Firebase error code
+        String errorMessage = 'Erreur lors de la validation';
+        if (e.code == 'permission-denied') {
+          errorMessage = 'Accès refusé : vous n\'êtes pas autorisé à effectuer cette action';
+        } else if (e.code == 'not-found') {
+          errorMessage = 'Document non trouvé : le document associé n\'existe pas';
+        } else {
+          errorMessage = 'Erreur inattendue : ${e.message}';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      } else {
+        // Show generic error message for other exceptions
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur inattendue: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _rejectVerification(BuildContext context, String verificationId) async {
+    try {
+      // Delete verification document or mark as rejected
+      await FirebaseFirestore.instance.collection('verification').doc(verificationId).delete();
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vérification refusée')),
+      );
+    } catch (e) {
+      // Show error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erreur lors du rejet de la vérification: $e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    String userId = widget.verification['userId'];
+    String firstName = widget.verification['firstName'] ?? '';
+    String lastName = widget.verification['lastName'] ?? '';
+    String registrationNumber = widget.verification['registrationNumber'] ?? '';
+    String idCardUrl = widget.verification['idCardUrl'] ?? '';
+    String vehicleCardUrl = widget.verification['vehicleCardUrl'] ?? '';
+    String vehicleImageUrl = widget.verification['vehicleImageUrl'] ?? '';
+    String insuranceImageUrl = widget.verification['insuranceImageUrl'] ?? '';
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Détails de la Vérification',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.teal,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              if (isVerified)
+                Container(
+                  padding: EdgeInsets.all(12.0),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withOpacity(0.1),
+                    border: Border.all(color: Colors.green, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.check_circle, color: Colors.green, size: 24.0),
+                      SizedBox(width: 8.0),
+                      Text(
+                        'Vérification validée',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 16.0),
+              Text('Nom: $firstName $lastName'),
+              SizedBox(height: 8.0),
+              Text('Matricule du véhicule: $registrationNumber'),
+              SizedBox(height: 16.0),
+              _buildImageWidget(idCardUrl, 'Carte d\'identité'),
+              SizedBox(height: 16.0),
+              _buildImageWidget(vehicleCardUrl, 'Carte d\'enregistrement du véhicule'),
+              SizedBox(height: 16.0),
+              _buildImageWidget(vehicleImageUrl, 'Image du véhicule'),
+              SizedBox(height: 16.0),
+              _buildImageWidget(insuranceImageUrl, 'Image de l\'assurance'),
+              SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () => _validateVerification(context, userId),
+                    child: Text('Valider'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => _rejectVerification(context, widget.verification.id),
+                    child: Text('Refuser'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImageWidget(String imageUrl, String title) {
+    if (imageUrl.isEmpty) {
+      return SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.teal),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+                child: CircularProgressIndicator(
+                  value: loadingProgress.expectedTotalBytes != null
+                      ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1)
+                      : null,
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Text('Impossible de charger l\'image');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}

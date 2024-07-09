@@ -19,128 +19,75 @@ class _TripPostingPageState extends State<TripPostingPage> {
   final TextEditingController _nombrePlacesController = TextEditingController();
   final TextEditingController _numeroController = TextEditingController();
 
-  // Créer une instance de TrajetService
   final TrajetService _trajetService = TrajetService();
-
-  bool _isPosting = false; // Booléen pour contrôler la visibilité du cercle de progression
+  bool _isPosting = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       body: Center(
-        child: Card(
-          elevation: 4.0,
-          color: Colors.white,
-          margin: EdgeInsets.only(left: 20, right: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: SingleChildScrollView(
-            padding: EdgeInsets.all(16.0),
-            child: Container(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      child: TextFormField(
-                        controller: _departController,
-                        decoration: InputDecoration(
-                          labelText: 'Depart',
-                          hintText: 'Entrez le depart',
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer le lieu de depart svp!';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    TextFormField(
-                      controller: _destinationController,
-                      decoration: InputDecoration(
-                        labelText: 'Destination',
-                        hintText: 'Entrez la destination',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Veuillez entrer le lieu de destination svp!";
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: _dateController,
-                      decoration: InputDecoration(
-                        labelText: 'Date',
-                        hintText: 'Entrez la date',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Veuillez entrer la date svp!";
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: _heureController,
-                      decoration: InputDecoration(
-                        labelText: "Entrez l'heure",
-                        hintText: "Entrez l'heure",
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Veuillez entrer l'heure svp!";
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: _nombrePlacesController,
-                      decoration: InputDecoration(
-                        labelText: ' Entrez le nombres de Places',
-                        hintText: 'Entrez le nombres de places',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Veuillez entrer le nombre de place svp!";
-                        }
-                      },
-                    ),
-                    TextFormField(
-                      controller: _numeroController,
-                      decoration: InputDecoration(
-                        labelText: ' Numero de telephone',
-                        hintText: 'Entrez le numero de telephone',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Veuillez entrer le numero svp!";
-                        }
-                      },
-                    ),
-                    Padding(
-                      padding: EdgeInsets.only(top: 10),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 40,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal, // Background color
-                          // Text color
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 8,
-                          ), // Padding
-                        ),
-                        onPressed: _isPosting ? null : () async {
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildTextFormField(
+                  controller: _departController,
+                  labelText: 'Départ',
+                  hintText: 'Entrez le départ',
+                  icon: Icons.location_on,
+                ),
+                SizedBox(height: 10),
+                _buildTextFormField(
+                  controller: _destinationController,
+                  labelText: 'Destination',
+                  hintText: 'Entrez la destination',
+                  icon: Icons.location_city,
+                ),
+                SizedBox(height: 10),
+                _buildTextFormField(
+                  controller: _dateController,
+                  labelText: 'Date',
+                  hintText: 'Entrez la date',
+                  icon: Icons.date_range,
+                ),
+                SizedBox(height: 10),
+                _buildTextFormField(
+                  controller: _heureController,
+                  labelText: "Entrez l'heure",
+                  hintText: "Entrez l'heure",
+                  icon: Icons.access_time,
+                ),
+                SizedBox(height: 10),
+                _buildTextFormField(
+                  controller: _nombrePlacesController,
+                  labelText: 'Nombre de places',
+                  hintText: 'Entrez le nombre de places',
+                  icon: Icons.event_seat,
+                ),
+                SizedBox(height: 10),
+                _buildTextFormField(
+                  controller: _numeroController,
+                  labelText: 'Numéro de téléphone',
+                  hintText: 'Entrez le numéro de téléphone',
+                  icon: Icons.phone,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.teal, // couleur de fond teal pour le bouton
+                  ),
+                  onPressed: _isPosting
+                      ? null
+                      : () async {
                           if (_formKey.currentState!.validate()) {
-                            // Activer la visibilité du cercle de progression
                             setState(() {
                               _isPosting = true;
                             });
 
-                            // Appeler la méthode publierTrajet
                             await _trajetService.publierTrajet(
                               depart: _departController.text,
                               destination: _destinationController.text,
@@ -148,10 +95,9 @@ class _TripPostingPageState extends State<TripPostingPage> {
                               heure: _heureController.text,
                               nombrePlaces: int.parse(_nombrePlacesController.text),
                               telephone: _numeroController.text,
-                              context: context, // Passer le contexte pour afficher la boîte de dialogue
+                              context: context,
                             );
 
-                            // Désactiver la visibilité du cercle de progression après 3 secondes
                             Future.delayed(Duration(seconds: 3), () {
                               setState(() {
                                 _isPosting = false;
@@ -159,17 +105,16 @@ class _TripPostingPageState extends State<TripPostingPage> {
                             });
                           }
                         },
-                        child: _isPosting ? _buildProgressIndicator() : Text(
+                  child: _isPosting
+                      ? CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        )
+                      : Text(
                           'Publier',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
+                          style: TextStyle(color: Colors.white),
                         ),
-                      ),
-                    )
-                  ],
                 ),
-              ),
+              ],
             ),
           ),
         ),
@@ -177,10 +122,39 @@ class _TripPostingPageState extends State<TripPostingPage> {
     );
   }
 
-  // Widget pour afficher le cercle de progression
-  Widget _buildProgressIndicator() {
-    return CircularProgressIndicator(
-      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+  Widget _buildTextFormField({
+    required TextEditingController controller,
+    required String labelText,
+    required String hintText,
+    required IconData icon,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(40),
+        ),
+        filled: true,
+        fillColor: Colors.grey[200],
+        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey[400]!),
+          borderRadius: BorderRadius.circular(40),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.teal),
+          borderRadius: BorderRadius.circular(40),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Ce champ est requis';
+        }
+        return null;
+      },
     );
   }
 }

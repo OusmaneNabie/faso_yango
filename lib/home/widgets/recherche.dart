@@ -12,10 +12,8 @@ class _SearchSectionState extends State<SearchSection> {
   final TextEditingController _departController = TextEditingController();
   final TextEditingController _destinationController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  final TextEditingController _heureController = TextEditingController();
-  final TextEditingController _placesController = TextEditingController();
 
-  bool _isLoading = false;  // Variable d'état pour le chargement
+  bool _isLoading = false; // Variable d'état pour le chargement
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +29,22 @@ class _SearchSectionState extends State<SearchSection> {
                 controller: _departController,
                 decoration: InputDecoration(
                   labelText: 'Départ',
-                  hintText: 'Entrez le départ',
+                  prefixIcon: Icon(Icons.location_on),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: 15.0, horizontal: 20.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -41,31 +54,67 @@ class _SearchSectionState extends State<SearchSection> {
                 },
               ),
             ),
-            TextFormField(
-              controller: _destinationController,
-              decoration: InputDecoration(
-                labelText: 'Destination',
-                hintText: 'Entrez la destination',
+            Container(
+              margin: EdgeInsets.only(bottom: 10),
+              child: TextFormField(
+                controller: _destinationController,
+                decoration: InputDecoration(
+                  labelText: 'Destination',
+                  prefixIcon: Icon(Icons.flag),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: 15.0, horizontal: 20.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer la destination svp!';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer la destination svp!';
-                }
-                return null;
-              },
             ),
-            TextFormField(
-              controller: _dateController,
-              decoration: InputDecoration(
-                labelText: 'Date',
-                hintText: 'Entrez la date',
+            Container(
+              margin: EdgeInsets.only(bottom: 10),
+              child: TextFormField(
+                controller: _dateController,
+                decoration: InputDecoration(
+                  labelText: 'Date',
+                  prefixIcon: Icon(Icons.date_range),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding: EdgeInsets.symmetric(
+                      vertical: 15.0, horizontal: 20.0),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey[400]!),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.teal),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Veuillez entrer la date svp!';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Veuillez entrer la date svp!';
-                }
-                return null;
-              },
             ),
             Padding(
               padding: EdgeInsets.only(top: 10),
@@ -78,14 +127,16 @@ class _SearchSectionState extends State<SearchSection> {
                   backgroundColor: Colors.teal,
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 ),
-                onPressed: _isLoading ? null : () {
-                  if (_formKey.currentState!.validate()) {
-                    setState(() {
-                      _isLoading = true;  // Début du chargement
-                    });
-                    searchTrajets(context);
-                  }
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() {
+                            _isLoading = true; // Début du chargement
+                          });
+                          searchTrajets(context);
+                        }
+                      },
                 child: _isLoading
                     ? CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -94,6 +145,7 @@ class _SearchSectionState extends State<SearchSection> {
                         'Rechercher',
                         style: TextStyle(
                           color: Colors.white,
+                          fontSize: 18,
                         ),
                       ),
               ),
@@ -132,7 +184,7 @@ class _SearchSectionState extends State<SearchSection> {
       showErrorDialog(context, 'Erreur lors de la recherche des trajets: $error');
     }).whenComplete(() {
       setState(() {
-        _isLoading = false;  // Fin du chargement
+        _isLoading = false; // Fin du chargement
       });
     });
   }

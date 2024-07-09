@@ -76,26 +76,56 @@ class _DriverDashboardPageState extends State<DriverDashboardPage> {
           children: [
             _buildDriverInfoCard(),
             SizedBox(height: 20),
-            _buildActionButtons(),
             SizedBox(height: 20),
             _buildSectionTitle('Résumé des trajets'),
             _buildSummaryCard(
-              icon: Icons.map,
-              title: 'Trajets effectués',
-              value: '120',
+              icon: Icons.trip_origin_sharp,
+              title: 'Ajouter un trajet',
               color: Colors.blue,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddTripForm()), // Remplacez `VotreNouvellePage` par le nom de votre page de destination
+                );
+              },
             ),
+
             _buildSummaryCard(
-              icon: Icons.calendar_today,
-              title: 'Prochains trajets',
-              value: '8',
+              icon: Icons.car_rental,
+              title: 'Ajouter un véhicule',
               color: Colors.orange,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddVehicleForm()), // Remplacez `VotreNouvellePage` par le nom de votre page de destination
+                );
+              },
             ),
             _buildSummaryCard(
-              icon: Icons.monetization_on,
-              title: 'Revenu total',
-              value: '\$2500',
+              icon: Icons.takeout_dining,
+              title: 'Trajets réservés',
               color: Colors.green,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DriverReservedRidesPage()), // Remplacez `VotreNouvellePage` par le nom de votre page de destination
+                );
+              },
+            ),
+            _buildSummaryCard(
+              icon: Icons.car_repair,
+              title: 'Mes véhicules',
+              color: Colors.green,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserVehiclesPage()), // Remplacez `VotreNouvellePage` par le nom de votre page de destination
+                );
+              },
             ),
             _buildSectionTitle('Statistiques de performance'),
             _buildPerformanceChart(),
@@ -155,118 +185,7 @@ class _DriverDashboardPageState extends State<DriverDashboardPage> {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => AddTripForm()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              ),
-              child: Text('Ajouter un trajet',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  )),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => AddVehicleForm()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              ),
-              child: Text('Ajouter vehicule',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  )),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        Row(
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => DriverReservedRidesPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              ),
-              child: Text('Trajets réservés',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  )),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => UserVehiclesPage()),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              ),
-              child: Text(' Mes vehicules...',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                  )),
-            ),
-          ],
-        ),
-        SizedBox(
-          height: 20,
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => DriverTripsPage()),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.purple,
-            padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          ),
-          child: Text('Mes trajets',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              )),
-        ),
-      ],
-    );
-  }
+  
 
   Widget _buildSectionTitle(String title) {
     return Padding(
@@ -279,34 +198,35 @@ class _DriverDashboardPageState extends State<DriverDashboardPage> {
     );
   }
 
-  Widget _buildSummaryCard(
-      {required IconData icon,
-      required String title,
-      required String value,
-      required Color color}) {
-    return Card(
-      elevation: 4,
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(icon, size: 40, color: color),
-            SizedBox(width: 16.0),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  value,
-                  style: TextStyle(fontSize: 24, color: Colors.grey[700]),
-                ),
-              ],
-            ),
-          ],
+  Widget _buildSummaryCard({
+    required IconData icon,
+    required String title,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4,
+        margin: EdgeInsets.symmetric(vertical: 8.0),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Icon(icon, size: 40, color: color),
+              SizedBox(width: 16.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -332,36 +252,50 @@ class _DriverDashboardPageState extends State<DriverDashboardPage> {
   }
 
   Widget _buildNotificationList() {
-    return Column(
-      children: [
-        _buildNotificationItem(
-          icon: Icons.info,
-          title: 'Nouvelle réservation',
-          subtitle: 'Vous avez une nouvelle réservation pour demain.',
-          color: Colors.teal,
-        ),
-        _buildNotificationItem(
-          icon: Icons.warning,
-          title: 'Avis en attente',
-          subtitle: 'Vous avez un nouvel avis en attente de validation.',
-          color: Colors.orange,
-        ),
-        _buildNotificationItem(
-          icon: Icons.event_available,
-          title: 'Trajet confirmé',
-          subtitle: 'Votre prochain trajet a été confirmé par le passager.',
-          color: Colors.blue,
-        ),
-      ],
-    );
-  }
+  return Column(
+    children: [
+      _buildNotificationItem(
+        icon: Icons.add_road_outlined,
+        title: 'Mes trajets',
+        color: Colors.teal,
+        onTap: () {
+          // Action lorsque l'élément est tapé (par exemple, navigation vers une nouvelle page)
+          // Exemple de navigation :
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => DriverTripsPage()), // Remplacez `VotreNouvellePage` par le nom de votre page de destination
+          );
+        },
+      ),
+      _buildNotificationItem(
+        icon: Icons.warning,
+        title: 'Avis en attente',
+        color: Colors.orange,
+        onTap: () {
+          // Action lorsque l'élément est tapé
+        },
+      ),
+      _buildNotificationItem(
+        icon: Icons.event_available,
+        title: 'Trajet confirmé',
+        color: Colors.blue,
+        onTap: () {
+          // Action lorsque l'élément est tapé
+        },
+      ),
+    ],
+  );
+}
 
-  Widget _buildNotificationItem(
-      {required IconData icon,
-      required String title,
-      required String subtitle,
-      required Color color}) {
-    return Card(
+Widget _buildNotificationItem({
+  required IconData icon,
+  required String title,
+  required Color color,
+  required VoidCallback onTap, // Ajoutez VoidCallback comme paramètre
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Card(
       elevation: 2,
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: ListTile(
@@ -370,13 +304,11 @@ class _DriverDashboardPageState extends State<DriverDashboardPage> {
           title,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-        ),
+        
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildLogoutButton() {
     return Center(

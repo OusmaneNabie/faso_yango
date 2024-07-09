@@ -19,9 +19,9 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: [
             Container(
-              width: 500,
+              width: 700,
               height: 300,
-              child: Image.asset('assets/images/bgimg1.jpg'),
+              child: Image.asset('assets/images/Premium.jpg'),
             ),
             Container(
               child:Center(

@@ -48,7 +48,13 @@ class _AddVehicleFormState extends State<AddVehicleForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Ajouter un véhicule'),
+        title: Text(
+          'Ajouter un véhicule',
+          style: TextStyle(
+            color:Colors.teal,
+            fontWeight: FontWeight.bold
+          ),
+          ),
         backgroundColor: Colors.teal,
       ),
       body: SingleChildScrollView(

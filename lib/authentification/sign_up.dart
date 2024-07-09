@@ -23,6 +23,7 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
@@ -79,7 +80,6 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
     }
   }
 
-
   Future<UserCredential> signInWithGoogle() async {
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
     final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
@@ -119,150 +119,197 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inscription',
-         style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color:Colors.white
-          )
+        title: const Text(
+          'Inscription',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
+        ),
         backgroundColor: Colors.teal,
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: FadeTransition(
-            opacity: _fadeAnimation,
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Hero(
-                      tag: 'logo',
-                      child: Icon(Icons.person_add, size: 100, color: Colors.teal),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildTextFormField(
-                      controller: _nomController,
-                      labelText: 'Nom',
-                      hintText: 'Entrez votre nom',
-                      validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre nom' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextFormField(
-                      controller: _prenomController,
-                      labelText: 'Prénom',
-                      hintText: 'Entrez votre prénom',
-                      validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre prénom' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextFormField(
-                      controller: _numeroController,
-                      labelText: 'Numéro',
-                      hintText: 'Entrez votre numéro',
-                      validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre numéro' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextFormField(
-                      controller: _emailController,
-                      labelText: 'Email',
-                      validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre email' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildTextFormField(
-                      controller: _passwordController,
-                      labelText: 'Mot de passe',
-                      obscureText: true,
-                      validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre mot de passe' : null,
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                        shadowColor: Colors.black,
-                        elevation: 5,
-                        padding: const EdgeInsets.all(16),
-                        minimumSize: const Size(double.infinity, 50),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      ),
-                      onPressed: _isLoading ? null : _handleSignUp,
-                      child: _isLoading
-                          ? CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            )
-                          : const Text('Inscription', style: TextStyle(fontSize: 16)),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('ou connectez-vous avec:', style: TextStyle(color: Colors.black54)),
-                    const SizedBox(height: 20),
-                    Row(
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage('assets/images/Road.jpg'), // Remplacez par le chemin de votre image
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: FadeTransition(
+                opacity: _fadeAnimation,
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildSocialButton(FontAwesomeIcons.facebook, Colors.blue,(){}),
-                        const SizedBox(width: 20),
-                        _buildSocialButton(FontAwesomeIcons.google, Colors.red, () async {
-                          try {
-                            UserCredential userCredential = await signInWithGoogle();
-                            if (userCredential.user != null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BarDeNavigation(),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Google sign-in failed: $e')));
-                          }
-                        }),
-                        const SizedBox(width: 20),
-                        _buildSocialButton(FontAwesomeIcons.apple, Colors.black, () async {
-                          try {
-                            UserCredential userCredential = await signInWithApple();
-                            if (userCredential.user != null) {
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => BarDeNavigation(),
-                                ),
-                              );
-                            }
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Apple sign-in failed: $e')));
-                          }
-                        }),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("Vous avez déjà un compte?"),
-                        const SizedBox(width: 5),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => LoginPage(),
+                      children: <Widget>[
+                        
+                        const SizedBox(height: 100),
+                        _buildTextFormField(
+                          controller: _nomController,
+                          labelText: 'Nom',
+                          hintText: 'Entrez votre nom',
+                          validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre nom' : null,
+                          icon: Icons.person,
+                        ),
+                        const SizedBox(height: 10),
+                        _buildTextFormField(
+                          controller: _prenomController,
+                          labelText: 'Prénom',
+                          hintText: 'Entrez votre prénom',
+                          validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre prénom' : null,
+                          icon: Icons.person,
+                        ),
+                        const SizedBox(height: 10),
+                        _buildTextFormField(
+                          controller: _numeroController,
+                          labelText: 'Numéro',
+                          hintText: 'Entrez votre numéro',
+                          validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre numéro' : null,
+                          icon: Icons.phone,
+                        ),
+                        const SizedBox(height: 10),
+                        _buildTextFormField(
+                          controller: _emailController,
+                          labelText: 'Email',
+                          hintText: 'Entrez votre email',
+                          validator: (value) => value == null || value.isEmpty ? 'Veuillez entrer votre email' : null,
+                          icon: Icons.email,
+                        ),
+                        const SizedBox(height: 10),
+                        TextFormField(
+                          controller: _passwordController,
+                          decoration: InputDecoration(
+                            labelText: 'Mot de passe',
+                            prefixIcon: Icon(Icons.lock),
+                            suffixIcon: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                              child: Icon(
+                                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                                color: Colors.grey[600],
                               ),
-                            );
-                          },
-                          child: const Text(
-                            "Se connecter",
-                            style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                            ),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(40)),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.grey[400]!),
+                              borderRadius: BorderRadius.circular(40),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.teal),
+                              borderRadius: BorderRadius.circular(40),
+                            ),
                           ),
+                          obscureText: _obscurePassword,
+                          validator: (value) =>
+                              value == null || value.isEmpty ? 'Veuillez entrer votre mot de passe' : null,
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.teal,
+                            foregroundColor: Colors.white,
+                            shadowColor: Colors.black,
+                            elevation: 5,
+                            padding: const EdgeInsets.all(16),
+                            minimumSize: const Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(40)),
+                          ),
+                          onPressed: _isLoading ? null : _handleSignUp,
+                          child: _isLoading
+                              ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                )
+                              : const Text('Inscription', style: TextStyle(fontSize: 16)),
+                        ),
+                        const SizedBox(height: 20),
+                        const Text('ou connectez-vous avec:', style: TextStyle(color: Colors.white)),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _buildSocialButton(FontAwesomeIcons.facebook, Colors.blue, () {}),
+                            const SizedBox(width: 20),
+                            _buildSocialButton(FontAwesomeIcons.google, Colors.red, () async {
+                              try {
+                                UserCredential userCredential = await signInWithGoogle();
+                                if (userCredential.user != null) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BarDeNavigation(),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text('Google sign-in failed: $e')));
+                              }
+                            }),
+                            const SizedBox(width: 20),
+                            _buildSocialButton(FontAwesomeIcons.apple, Colors.black, () async {
+                              try {
+                                UserCredential userCredential = await signInWithApple();
+                                if (userCredential.user != null) {
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => BarDeNavigation(),
+                                    ),
+                                  );
+                                }
+                              } catch (e) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(content: Text('Apple sign-in failed: $e')));
+                              }
+                            }),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              "Vous avez déjà un compte?",
+                              style: TextStyle(color: Colors.white)
+                              ),
+                            const SizedBox(width: 5),
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => LoginPage(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "Se connecter",
+                                style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -271,17 +318,29 @@ class _SignInPageState extends State<SignInPage> with SingleTickerProviderStateM
     required TextEditingController controller,
     required String labelText,
     String? hintText,
-    bool obscureText = false,
     String? Function(String?)? validator,
+    IconData? icon,
   }) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        prefixIcon: icon != null ? Icon(icon) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(40)),
+        filled: true,
+        fillColor: Colors.grey[200],
+        contentPadding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.grey[400]!),
+          borderRadius: BorderRadius.circular(40),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.teal),
+          borderRadius: BorderRadius.circular(40),
+        ),
       ),
-      obscureText: obscureText,
+      obscureText: false,
       validator: validator,
     );
   }

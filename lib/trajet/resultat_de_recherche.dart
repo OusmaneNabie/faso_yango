@@ -11,7 +11,13 @@ class SearchResultsPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.teal,
-        title: Text('Résultats de la recherche'),
+        title: Text(
+          'Résultats de la recherche',
+          style: TextStyle(
+            color:Colors.white,
+            fontWeight: FontWeight.bold
+          ),
+          ),
       ),
       body: results.isEmpty
           ? Center(

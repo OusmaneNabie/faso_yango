@@ -9,8 +9,16 @@ class UserDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Détails de l\'utilisateur'),
+        title: Text(
+          'Détails de l\'utilisateur',
+          style: TextStyle(
+            color:Colors.teal,
+            fontWeight: FontWeight.bold,
+          ),
+          ),
+        backgroundColor: Colors.teal,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
